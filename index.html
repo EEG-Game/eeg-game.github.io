@@ -296,6 +296,7 @@ function loadQuestion() {
     optionsContainer.appendChild(optionElement);
   });
 
+  submitBtn.style.display = 'block';
   submitBtn.disabled = true;
 }
 
@@ -325,6 +326,7 @@ function submitAnswer() {
 }
 
 function nextQuestion() {
+  nextBtn.style.display = 'none';
   currentQuestion++;
   if (currentQuestion < waveforms.length) {
     loadQuestion();
