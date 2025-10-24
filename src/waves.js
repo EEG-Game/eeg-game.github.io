@@ -237,3 +237,84 @@ export function drawPOSTS(ctx, width, height){
 }
 
 
+// =====
+
+export const drawRegistry = {
+  // One-to-one mappings:
+  drawAlpha,
+  drawBeta,
+  drawMu,
+  drawVertex,
+  drawSpindle,
+  drawKComplex,
+  drawPOSTS,
+  drawSpikeAndWave,
+  drawPolyspikeWaves,
+  drawChaoticPattern,
+  drawSlowSpikeAndWave,
+  drawFastActivity,
+  drawPhoticResponsePattern,
+  drawDipoleSpikes,
+  drawPeriodicDischarges,
+
+  // Parameterized wrappers (from your original inline lambdas):
+  drawRandomSpikes_5_60: (w, h) => drawRandomSpikes(w, h, 5, 60),
+  drawFocalSharpWaves_07w: (w, h) => drawFocalSharpWaves(w, h, w * 0.7),
+};
+
+// waveformLoader.js
+export async function loadWaveformBankFromTSV(url) {
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`Failed to load TSV: ${resp.status} ${resp.statusText}`);
+  const text = await resp.text();
+
+  const rows = parseTSV(text); // [{Category, Name, ... , Draw}, ...]
+  const bank = { normal: [], sleep: [], abnormal: [] };
+
+  for (const r of rows) {
+    const category = (r.Category || "").trim().toLowerCase();
+    const entry = {
+      name: (r.Name || "").trim(),
+      description: (r.Description || "").trim(),
+      frequency: (r.Frequency || "").trim(),
+      amplitude: (r.Amplitude || "").trim(),
+      clinicalSignificance: (r.ClinicalSignificance || "").trim(),
+      draw: resolveDraw(r.Draw, drawRegistry),
+    };
+
+    if (!bank[category]) bank[category] = [];
+    bank[category].push(entry);
+  }
+
+  return bank;
+}
+
+function resolveDraw(key, registry) {
+  const k = (key || "").trim();
+  const fn = registry[k];
+  if (typeof fn === "function") return fn;
+
+  // Soft fallback: no-op drawer to avoid crashes (you can throw instead)
+  console.warn(`No draw function found for key "${k}". Using no-op.`);
+  return (w, h, ctx) => {};
+}
+
+// Minimal TSV parser for simple, tab-delimited text with a header line.
+// - Ignores blank lines and lines starting with '#'
+// - Does not handle quoted tabs (TSV rarely needs quoting)
+function parseTSV(tsv) {
+  const lines = tsv
+    .split(/\r?\n/)
+    .map(l => l.trimEnd())
+    .filter(l => l && !l.startsWith("#"));
+
+  if (lines.length === 0) return [];
+  const header = lines[0].split("\t");
+  return lines.slice(1).map(line => {
+    const cells = line.split("\t");
+    const obj = {};
+    header.forEach((h, i) => (obj[h] = cells[i] ?? ""));
+    return obj;
+  });
+}
+

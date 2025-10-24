@@ -3,16 +3,12 @@ import {
 } from './quiz.js';
 import { state } from './state.js';
 import { shuffleArray } from './utils.js';
-import { waveformBank } from './wavebank.js';
-
-/* -----------------------------
-   STATE
---------------------------------*/
+import { loadWaveformBankFromTSV } from './waves.js';
 
 /* -----------------------------
    INIT / CATEGORY SWITCH
 --------------------------------*/
-function setCategory(newCat, resultsContainer, waveInfo, submitBtn, nextBtn, optionsContainer, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx, categoryLabel, categoryPicker) {
+function setCategory(newCat, resultsContainer, waveInfo, submitBtn, nextBtn, optionsContainer, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx, categoryLabel, categoryPicker, waveformBank) {
   state.category = newCat;
   // shallow copy so we can shuffle without affecting bank
   state.waveforms = [...waveformBank[state.category]];
@@ -25,7 +21,8 @@ function setCategory(newCat, resultsContainer, waveInfo, submitBtn, nextBtn, opt
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+    const waveformBank = await loadWaveformBankFromTSV("../data/waveforms.tsv");
     /* -----------------------------
        DOM
     --------------------------------*/
@@ -54,16 +51,16 @@ document.addEventListener("DOMContentLoaded", () => {
     categoryPicker.addEventListener('click', (e)=>{
       const target = e.target.closest('.chip');
           if(!target) return;
-          setCategory(target.dataset.category, resultsContainer, waveInfo, submitBtn, nextBtn, optionsContainer, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx, categoryLabel, categoryPicker);
+          setCategory(target.dataset.category, resultsContainer, waveInfo, submitBtn, nextBtn, optionsContainer, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx, categoryLabel, categoryPicker, waveformBank);
     });
     submitBtn.addEventListener('click', () => submitAnswer(waveDescription, waveInfo, submitBtn, nextBtn));
     nextBtn.addEventListener('click', () => nextQuestion(optionsContainer, submitBtn, waveInfo, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx, nextBtn, resultsContainer, scoreValue, performanceMessage));
-    restartBtn.addEventListener('click', ()=> setCategory(state.category, resultsContainer, waveInfo, submitBtn, nextBtn, optionsContainer, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx, categoryLabel, categoryPicker));
+    restartBtn.addEventListener('click', ()=> setCategory(state.category, resultsContainer, waveInfo, submitBtn, nextBtn, optionsContainer, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx, categoryLabel, categoryPicker, waveformBank));
 
     /* -----------------------------
        START
     --------------------------------*/
-    setCategory('normal', resultsContainer, waveInfo, submitBtn, nextBtn, optionsContainer, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx, categoryLabel, categoryPicker); // default
+    setCategory('normal', resultsContainer, waveInfo, submitBtn, nextBtn, optionsContainer, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx, categoryLabel, categoryPicker, waveformBank); // default
 
 });
 

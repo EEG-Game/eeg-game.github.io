@@ -1,0 +1,19 @@
+Category	Name	Description	Frequency	Amplitude	ClinicalSignificance	Draw
+normal	Posterior Dominant Rhythm (Alpha)	Normal relaxed-awake rhythm with eyes closed; posterior maximal ~8–13 Hz alpha attenuating with eye opening (‘alpha block’).	8–13 Hz	Low–moderate	Normal awake	drawAlpha
+normal	Low-Amplitude Beta	Frontocentral-predominant, low-amplitude fast activity; increases with drowsiness or benzodiazepines.	13–30+ Hz	Low	Normal variant / medication effect	drawBeta
+normal	Mu Rhythm	Arciform rhythm over sensorimotor cortex (central); ~8–10 Hz, blocked by contralateral movement or tactile input.	8–10 Hz	Variable	Normal variant	drawMu
+sleep	Vertex Sharp Waves	Stage N1/N2 sleep; sharp monophasic waves maximal at Cz, often symmetric.	Isolated/transient	Moderate	Normal sleep transients	drawVertex
+sleep	Sleep Spindles	Waxing/waning 11–16 Hz spindles, maximal frontocentral, defining feature of N2 sleep.	11–16 Hz	Low–moderate	Normal N2 sleep	drawSpindle
+sleep	K-Complex	High-amplitude, biphasic negative–positive complex, often preceding a spindle; hallmark of N2 sleep.	Isolated/transient	High	Normal N2 sleep	drawKComplex
+sleep	POSTS (Positive Occipital Sharp Transients of Sleep)	Benign positive sharp transients in occipital regions during drowsiness/N2; often diphasic.	Intermittent	Low–moderate	Benign sleep variant	drawPOSTS
+abnormal	Spike-and-Wave Discharge	Classic ~3 Hz spike-and-wave of typical absence seizures.	≈3 Hz	High	Generalized absence epilepsy	drawSpikeAndWave
+abnormal	Polyspike Waves	Multiple spikes followed by a slow wave; juvenile myoclonic epilepsy.	4–6 Hz	High	Generalized epilepsy syndromes	drawPolyspikeWaves
+abnormal	Focal Spikes	Localized spikes indicating focal cortical irritability.	Variable	Variable	Focal epilepsy	drawRandomSpikes_5_60
+abnormal	Hypsarrhythmia	Chaotic, high-voltage slow waves with multifocal spikes; infantile spasms.	Disorganized	High	Infantile spasms	drawChaoticPattern
+abnormal	Slow Spike-and-Wave	1.5–2.5 Hz slow spike-and-wave; Lennox–Gastaut syndrome.	1.5–2.5 Hz	High	LGS	drawSlowSpikeAndWave
+abnormal	Generalized Paroxysmal Fast Activity	Bursts of 10–20 Hz spikes/polyspikes during sleep; LGS.	10–20 Hz	Variable	LGS	drawFastActivity
+abnormal	Photoparoxysmal Response	Generalized spikes or spike–wave triggered by photic stimulation.	Variable	Variable	Photosensitive epilepsy	drawPhoticResponsePattern
+abnormal	Temporal Lobe Sharp Waves	Sharp waves maximal at temporal electrodes; temporal lobe epilepsy.	Variable	Med–high	Temporal lobe epilepsy	drawFocalSharpWaves_07w
+abnormal	Rolandic Spikes	Centrotemporal spikes with horizontal dipole; BECTS/SeLECTS.	Variable	High	Self-limited epilepsy with centrotemporal spikes	drawDipoleSpikes
+abnormal	PLEDs (Lateralized Periodic Discharges)	Periodic lateralized discharges; often acute structural lesion.	0.5–2 Hz	High	Acute cerebral injury	drawPeriodicDischarges
+
