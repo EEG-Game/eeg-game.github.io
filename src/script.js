@@ -1,5 +1,5 @@
 import {
-    initQuiz, loadQuestion, submitAnswer, nextQuestion, showResults
+    initQuiz, submitAnswer, nextQuestion
 } from './quiz.js';
 import { state } from './state.js';
 import { shuffleArray } from './utils.js';
@@ -19,86 +19,125 @@ function formatCategoryLabel(category) {
     .trim();
 }
 
-function renderCategoryPicker(categoryPicker, waveformBank) {
-  const categories = Object.keys(waveformBank)
-    .filter(cat => Array.isArray(waveformBank[cat]) && waveformBank[cat].length > 0);
+class EEGGame {
+  constructor(doc = document) {
+    this.doc = doc;
+    this.waveformBank = {};
+    this.categories = [];
+  }
 
-  categoryPicker.innerHTML = '';
+  async init(dataPath = "../data/waveforms.tsv") {
+    this.waveformBank = await loadWaveformBankFromTSV(dataPath);
+    this.captureUi()
+        .renderCategoryPicker()
+        .bindEvents();
+    return this;
+  }
 
-  categories.forEach((category, idx) => {
-    const button = document.createElement('button');
-    button.className = `chip${idx === 0 ? ' active' : ''}`;
-    button.dataset.category = category;
-    button.textContent = formatCategoryLabel(category);
-    categoryPicker.appendChild(button);
-  });
+  captureUi() {
+    const waveformCanvas = this.doc.getElementById('waveform');
+    state.ui = {
+      questionText: this.doc.getElementById('question-text'),
+      optionsContainer: this.doc.getElementById('options-container'),
+      progressBar: this.doc.getElementById('progress'),
+      currentQuestionElement: this.doc.getElementById('current-question'),
+      totalQuestionsElement: this.doc.getElementById('total-questions'),
+      submitBtn: this.doc.getElementById('submit-btn'),
+      nextBtn: this.doc.getElementById('next-btn'),
+      restartBtn: this.doc.getElementById('restart-btn'),
+      resultsContainer: this.doc.getElementById('results'),
+      scoreValue: this.doc.getElementById('score-value'),
+      totalQuestionsResult: this.doc.getElementById('total-questions-result'),
+      performanceMessage: this.doc.getElementById('performance-message'),
+      waveInfo: this.doc.getElementById('wave-info'),
+      waveDescription: this.doc.getElementById('wave-description'),
+      waveformCanvas,
+      ctx: waveformCanvas ? waveformCanvas.getContext('2d') : null,
+      categoryPicker: this.doc.getElementById('category-picker'),
+      categoryLabel: this.doc.getElementById('category-label'),
+      quizContainer: this.doc.querySelector('.quiz-container')
+    };
+    return this;
+  }
 
-  return categories;
-}
+  renderCategoryPicker() {
+    const { categoryPicker } = state.ui;
+    const categories = Object.keys(this.waveformBank)
+      .filter(cat => Array.isArray(this.waveformBank[cat]) && this.waveformBank[cat].length > 0);
 
-/* -----------------------------
-   INIT / CATEGORY SWITCH
---------------------------------*/
-function setCategory(newCat, resultsContainer, waveInfo, submitBtn, nextBtn, optionsContainer, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx, categoryLabel, categoryPicker, waveformBank) {
-  state.category = newCat;
-  // shallow copy so we can shuffle without affecting bank
-  state.waveforms = [...waveformBank[state.category]];
-  shuffleArray(state.waveforms);
-  initQuiz(resultsContainer, waveInfo, submitBtn, nextBtn, optionsContainer, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx);
-  categoryLabel.textContent = ` | Category: ${state.category[0].toUpperCase()+state.category.slice(1)}`;
-  // update chips UI
-  [...categoryPicker.querySelectorAll('.chip')].forEach(ch=>{
-    ch.classList.toggle('active', ch.dataset.category===state.category);
-  });
-}
+    this.categories = categories;
 
-document.addEventListener("DOMContentLoaded", async () => {
-    const waveformBank = await loadWaveformBankFromTSV("../data/waveforms.tsv");
-    /* -----------------------------
-       DOM
-    --------------------------------*/
-    const questionText = document.getElementById('question-text');
-    const optionsContainer = document.getElementById('options-container');
-    const progressBar = document.getElementById('progress');
-    const currentQuestionElement = document.getElementById('current-question');
-    const totalQuestionsElement = document.getElementById('total-questions');
-    const submitBtn = document.getElementById('submit-btn');
-    const nextBtn = document.getElementById('next-btn');
-    const restartBtn = document.getElementById('restart-btn');
-    const resultsContainer = document.getElementById('results');
-    const scoreValue = document.getElementById('score-value');
-    const totalQuestionsResult = document.getElementById('total-questions-result');
-    const performanceMessage = document.getElementById('performance-message');
-    const waveInfo = document.getElementById('wave-info');
-    const waveDescription = document.getElementById('wave-description');
-    const waveformCanvas = document.getElementById('waveform');
-    const ctx = waveformCanvas.getContext('2d');
-    const categoryPicker = document.getElementById('category-picker');
-    const categoryLabel = document.getElementById('category-label');
+    if (!categoryPicker) return this;
 
-    /* -----------------------------
-       EVENTS
-    --------------------------------*/
-    const availableCategories = renderCategoryPicker(categoryPicker, waveformBank);
+    categoryPicker.innerHTML = '';
 
-    categoryPicker.addEventListener('click', (e)=>{
-      const target = e.target.closest('.chip');
-          if(!target) return;
-          setCategory(target.dataset.category, resultsContainer, waveInfo, submitBtn, nextBtn, optionsContainer, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx, categoryLabel, categoryPicker, waveformBank);
+    categories.forEach((category, idx) => {
+      const button = this.doc.createElement('button');
+      button.className = `chip${idx === 0 ? ' active' : ''}`;
+      button.dataset.category = category;
+      button.textContent = formatCategoryLabel(category);
+      categoryPicker.appendChild(button);
     });
-    submitBtn.addEventListener('click', () => submitAnswer(waveDescription, waveInfo, submitBtn, nextBtn));
-    nextBtn.addEventListener('click', () => nextQuestion(optionsContainer, submitBtn, waveInfo, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx, nextBtn, resultsContainer, scoreValue, performanceMessage));
-    restartBtn.addEventListener('click', ()=> setCategory(state.category, resultsContainer, waveInfo, submitBtn, nextBtn, optionsContainer, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx, categoryLabel, categoryPicker, waveformBank));
 
-    /* -----------------------------
-       START
-    --------------------------------*/
-    const initialCategory = availableCategories.includes('normal') ? 'normal' : availableCategories[0];
-    if (initialCategory) {
-      setCategory(initialCategory, resultsContainer, waveInfo, submitBtn, nextBtn, optionsContainer, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx, categoryLabel, categoryPicker, waveformBank); // default
-    } else {
-      console.warn('No categories available in waveform bank.');
+    return this;
+  }
+
+  bindEvents() {
+    const { categoryPicker, submitBtn, nextBtn, restartBtn } = state.ui;
+    categoryPicker?.addEventListener('click', (event) => {
+      const target = event.target.closest('.chip');
+      if (!target) return;
+      this.setCategory(target.dataset.category);
+    });
+    submitBtn?.addEventListener('click', () => submitAnswer());
+    nextBtn?.addEventListener('click', () => nextQuestion());
+    restartBtn?.addEventListener('click', () => this.restart());
+    return this;
+  }
+
+  setCategory(newCategory) {
+    if (!this.waveformBank[newCategory] || this.waveformBank[newCategory].length === 0) {
+      console.warn(`Unknown or empty category "${newCategory}" requested.`);
+      return this;
     }
 
-});
+    state.category = newCategory;
+    state.waveforms = [...this.waveformBank[state.category]];
+    shuffleArray(state.waveforms);
+    initQuiz();
 
+    const { categoryLabel, categoryPicker } = state.ui;
+    if (categoryLabel) {
+      categoryLabel.textContent = ` | Category: ${formatCategoryLabel(state.category)}`;
+    }
+    if (categoryPicker) {
+      [...categoryPicker.querySelectorAll('.chip')].forEach(chip => {
+        chip.classList.toggle('active', chip.dataset.category === state.category);
+      });
+    }
+
+    return this;
+  }
+
+  restart() {
+    return this.setCategory(state.category);
+  }
+
+  start(preferredCategory) {
+    const fallback = preferredCategory && this.categories.includes(preferredCategory)
+      ? preferredCategory
+      : (this.categories.includes('normal') ? 'normal' : this.categories[0]);
+
+    if (!fallback) {
+      console.warn('No categories available in waveform bank.');
+      return this;
+    }
+
+    return this.setCategory(fallback);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const game = await new EEGGame().init();
+  window.eegGame = game.start();
+});

@@ -9,23 +9,43 @@ import { drawWaveform } from './waves.js';
    QUIZ FLOW
 --------------------------------*/
 
-export function initQuiz(resultsContainer, waveInfo, submitBtn, nextBtn, optionsContainer, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx) {
+export function initQuiz() {
+  const {
+    quizContainer,
+    resultsContainer,
+    waveInfo,
+    submitBtn,
+    nextBtn
+  } = state.ui;
+
   state.currentQuestion = 0;
   state.score = 0;
   state.selectedOption = null;
   state.quizCompleted = false;
 
-  document.querySelector('.quiz-container').style.display = 'block';
+  quizContainer.style.display = 'block';
   resultsContainer.style.display = 'none';
   waveInfo.style.display = 'none';
   submitBtn.style.display = 'block';
   nextBtn.style.display = 'none';
 
-  loadQuestion(optionsContainer, submitBtn, waveInfo, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx);
+  loadQuestion();
 }
 
-export function loadQuestion(optionsContainer, submitBtn, waveInfo, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx) {
-  resetOptions(optionsContainer, submitBtn);
+export function loadQuestion() {
+  const {
+    optionsContainer,
+    submitBtn,
+    waveInfo,
+    progressBar,
+    currentQuestionElement,
+    totalQuestionsElement,
+    totalQuestionsResult,
+    waveformCanvas,
+    ctx
+  } = state.ui;
+
+  resetOptions();
   waveInfo.style.display = 'none';
 
   const progress = (state.currentQuestion / state.waveforms.length) * 100;
@@ -45,7 +65,7 @@ export function loadQuestion(optionsContainer, submitBtn, waveInfo, progressBar,
     const optionElement = document.createElement('div');
     optionElement.classList.add('option');
     optionElement.textContent = option;
-    optionElement.addEventListener('click', () => selectOption(optionElement, option, submitBtn));
+    optionElement.addEventListener('click', () => selectOption(optionElement, option));
     optionsContainer.appendChild(optionElement);
   });
 
@@ -53,7 +73,14 @@ export function loadQuestion(optionsContainer, submitBtn, waveInfo, progressBar,
   submitBtn.disabled = true;
 }
 
-export function submitAnswer(waveDescription, waveInfo, submitBtn, nextBtn) {
+export function submitAnswer() {
+  const {
+    waveDescription,
+    waveInfo,
+    submitBtn,
+    nextBtn
+  } = state.ui;
+
   if (state.selectedOption === null) return;
 
   const correctAnswer = state.waveforms[state.currentQuestion].name;
@@ -78,19 +105,27 @@ export function submitAnswer(waveDescription, waveInfo, submitBtn, nextBtn) {
   nextBtn.style.display = 'block';
 }
 
-export function nextQuestion(optionsContainer, submitBtn, waveInfo, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx, nextBtn, resultsContainer, scoreValue, performanceMessage) {
+export function nextQuestion() {
+  const { nextBtn } = state.ui;
   nextBtn.style.display = 'none';
   state.currentQuestion++;
   if (state.currentQuestion < state.waveforms.length) {
-    loadQuestion(optionsContainer, submitBtn, waveInfo, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx);
+    loadQuestion();
   } else {
-    showResults(resultsContainer, scoreValue, totalQuestionsResult, performanceMessage);
+    showResults();
   }
 }
 
-export function showResults(resultsContainer, scoreValue, totalQuestionsResult, performanceMessage) {
+export function showResults() {
+  const {
+    quizContainer,
+    resultsContainer,
+    scoreValue,
+    totalQuestionsResult,
+    performanceMessage
+  } = state.ui;
   state.quizCompleted = true;
-  document.querySelector('.quiz-container').style.display = 'none';
+  quizContainer.style.display = 'none';
   resultsContainer.style.display = 'block';
 
   scoreValue.textContent = state.score;

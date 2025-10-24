@@ -4,5 +4,6 @@ export let state = {
     score: 0,
     quizCompleted: false,
     category: "normal",
-    waveforms: [] // active list for current category
+    waveforms: [], // active list for current category
+    ui: {} // runtime DOM references
 };

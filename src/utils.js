@@ -23,7 +23,8 @@ export function shuffleArray(arr){
   }
 }
 
-export function selectOption(el, option, submitBtn){
+export function selectOption(el, option){
+  const { submitBtn } = state.ui;
   if (state.quizCompleted) return;
   document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
   el.classList.add('selected');
@@ -31,10 +32,10 @@ export function selectOption(el, option, submitBtn){
   submitBtn.disabled = false;
 }
 
-export function resetOptions(optionsContainer, submitBtn){
+export function resetOptions(){
+  const { optionsContainer, submitBtn } = state.ui;
   optionsContainer.innerHTML = '';
   state.selectedOption = null;
   submitBtn.disabled = true;
 }
-
 
