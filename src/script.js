@@ -5,6 +5,37 @@ import { state } from './state.js';
 import { shuffleArray } from './utils.js';
 import { loadWaveformBankFromTSV } from './waves.js';
 
+function formatCategoryLabel(category) {
+  const presets = {
+    normal: 'Normal (Awake)',
+    sleep: 'Sleep Patterns',
+    abnormal: 'Abnormal Patterns',
+  };
+  if (presets[category]) return presets[category];
+  return category
+    .split(/[_-]/g)
+    .map(part => part ? part[0].toUpperCase() + part.slice(1) : part)
+    .join(' ')
+    .trim();
+}
+
+function renderCategoryPicker(categoryPicker, waveformBank) {
+  const categories = Object.keys(waveformBank)
+    .filter(cat => Array.isArray(waveformBank[cat]) && waveformBank[cat].length > 0);
+
+  categoryPicker.innerHTML = '';
+
+  categories.forEach((category, idx) => {
+    const button = document.createElement('button');
+    button.className = `chip${idx === 0 ? ' active' : ''}`;
+    button.dataset.category = category;
+    button.textContent = formatCategoryLabel(category);
+    categoryPicker.appendChild(button);
+  });
+
+  return categories;
+}
+
 /* -----------------------------
    INIT / CATEGORY SWITCH
 --------------------------------*/
@@ -48,6 +79,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     /* -----------------------------
        EVENTS
     --------------------------------*/
+    const availableCategories = renderCategoryPicker(categoryPicker, waveformBank);
+
     categoryPicker.addEventListener('click', (e)=>{
       const target = e.target.closest('.chip');
           if(!target) return;
@@ -60,8 +93,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     /* -----------------------------
        START
     --------------------------------*/
-    setCategory('normal', resultsContainer, waveInfo, submitBtn, nextBtn, optionsContainer, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx, categoryLabel, categoryPicker, waveformBank); // default
+    const initialCategory = availableCategories.includes('normal') ? 'normal' : availableCategories[0];
+    if (initialCategory) {
+      setCategory(initialCategory, resultsContainer, waveInfo, submitBtn, nextBtn, optionsContainer, progressBar, currentQuestionElement, totalQuestionsElement, totalQuestionsResult, waveformCanvas, ctx, categoryLabel, categoryPicker, waveformBank); // default
+    } else {
+      console.warn('No categories available in waveform bank.');
+    }
 
 });
-
 
